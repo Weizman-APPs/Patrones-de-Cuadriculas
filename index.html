@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Patrones en Cuadrados y Rutas (PDF)</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Encabezado Principal -->
+  <header class="app-header">
+    <div class="brand-area">
+      <div class="brand-icon">🟦</div>
+      <div>
+        <h1 class="brand-title">Patrones en Cuadrados</h1>
+        <p class="brand-subtitle">Rutas, Pixel Art y Generador de PDF</p>
+      </div>
+    </div>
+
+    <!-- Selector de Modo de Trabajo -->
+    <div class="mode-switch-group">
+      <button id="btn-mode-routes" class="mode-btn active" title="Trazar caminos paso a paso con flechas y secuencias">
+        <span>📍 Rutas Lineales</span>
+      </button>
+      <button id="btn-mode-grid" class="mode-btn" title="Pintar cuadrícula libre o diseñar Pixel Art">
+        <span>🎨 Cuadrícula / Pixel Art</span>
+      </button>
+    </div>
+
+    <!-- Acciones de Exportación y Vista Previa -->
+    <div class="header-actions">
+      <button id="btn-preview-pdf" class="btn" title="Ver cómo se verá el PDF final">
+        <span>👁️ Vista Previa PDF</span>
+      </button>
+      <button id="btn-export-current-pdf" class="btn btn-primary" title="Descargar solo la página actual en PDF">
+        <span>📄 Descargar Página</span>
+      </button>
+      <button id="btn-export-all-pdf" class="btn btn-success" title="Descargar todas las páginas en un solo PDF">
+        <span>📚 Descargar Cuadernillo</span>
+      </button>
+      <button id="btn-direct-print" class="btn btn-icon" title="Imprimir directamente">
+        <span>🖨️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Distribución Principal -->
+  <div class="main-layout">
+
+    <!-- Panel Lateral Izquierdo (Controles y Herramientas) -->
+    <aside class="sidebar">
+
+      <!-- Sección: Paleta de Colores -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">🎨 Paleta de Colores</h2>
+
+        <div class="form-group">
+          <label class="form-label" for="select-palette-preset">Paleta temática:</label>
+          <select id="select-palette-preset" class="form-select">
+            <option value="pdfSample">Muestra Original (PDF)</option>
+            <option value="rainbow">Arcoíris Divertido</option>
+            <option value="pastel">Pastel Suave</option>
+            <option value="primary">Primarios Educativos</option>
+            <option value="cyber">Neón Tecnológico</option>
+            <option value="monochrome">Escala de Grises</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Colores activos (clic para seleccionar):</label>
+          <div id="palette-colors" class="palette-swatches"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Agregar color personalizado:</label>
+          <div class="custom-color-row">
+            <input type="color" id="input-custom-color" class="color-input-picker" value="#3B82F6">
+            <button id="btn-add-custom-color" class="btn btn-sm">➕ Añadir a la paleta</button>
+          </div>
+        </div>
+
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="toggle-cycle-colors" checked>
+          <span>Rotación automática de colores en ruta</span>
+        </label>
+
+        <div id="color-rotation-options" style="margin-top: 8px;">
+          <label class="form-label" for="select-color-rotation-mode">Modo de cambio de color:</label>
+          <select id="select-color-rotation-mode" class="form-select">
+            <option value="sequence" selected>🔁 Secuencial (1, 2, 3, 1...)</option>
+            <option value="random">🎲 Aleatorio / Random</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sección: Cuadrícula y Tamaño -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">📐 Tamaño y Cuadrícula</h2>
+
+        <div class="form-group">
+          <label class="form-label" for="select-grid-size">Tamaño de cuadrícula:</label>
+          <select id="select-grid-size" class="form-select">
+            <option value="6">6 × 6</option>
+            <option value="8">8 × 8</option>
+            <option value="10" selected>10 × 10 (Estándar PDF)</option>
+            <option value="12">12 × 12</option>
+            <option value="16">16 × 16</option>
+            <option value="20">20 × 20</option>
+          </select>
+        </div>
+
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="toggle-canvas-grid" checked>
+          <span>Mostrar cuadrícula tenue en el editor</span>
+        </label>
+      </div>
+
+      <!-- Sección: Opciones de Flechas (Visible en Modo Rutas) -->
+      <div id="arrow-settings-box" class="sidebar-section">
+        <h2 class="sidebar-title">➡️ Flechas en Cuadrados</h2>
+
+        <label class="form-checkbox-label" style="margin-bottom: 0.75rem;">
+          <input type="checkbox" id="toggle-show-arrows">
+          <span><strong>Mostrar flechas en los cuadrados</strong></span>
+        </label>
+
+        <div class="form-group">
+          <label class="form-label" for="select-arrow-type">Función de la flecha:</label>
+          <select id="select-arrow-type" class="form-select">
+            <option value="direction">➡️ Dirección de la ruta (movimiento)</option>
+            <option value="nextColor">🎯 Flecha que muestra el color siguiente</option>
+            <option value="number">🔢 Número de paso (1, 2, 3...)</option>
+            <option value="both">🔀 Flecha + Número</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select-arrow-color">Color de la flecha:</label>
+          <select id="select-arrow-color" class="form-select">
+            <option value="auto">Automático (Alto contraste blanco/negro)</option>
+            <option value="nextColor">Color del siguiente cuadrado</option>
+            <option value="white">Blanco puro</option>
+            <option value="black">Negro puro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sección: Herramientas Pixel Art (Visible en Modo Cuadrícula) -->
+      <div id="pixel-tools-box" class="sidebar-section" style="display: none;">
+        <h2 class="sidebar-title">🖌️ Herramientas de Pintura</h2>
+        <div class="tool-btn-group">
+          <button id="btn-tool-brush" class="tool-btn active">✏️ Pincel</button>
+          <button id="btn-tool-eraser" class="tool-btn">🧹 Borrar</button>
+          <button id="btn-tool-bucket" class="tool-btn">🪣 Relleno</button>
+        </div>
+      </div>
+
+      <!-- Sección: Plantillas y Generador -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">⚡ Plantillas y Generador</h2>
+
+        <div class="form-group">
+          <label class="form-label">Patrones del PDF de muestra:</label>
+          <select id="select-pdf-preset" class="form-select">
+            <option value="">-- Seleccionar patrón del PDF --</option>
+            <option value="pdf-page-1">Pág 1: Bucle en U invertida</option>
+            <option value="pdf-page-2">Pág 2: Gancho angular</option>
+            <option value="pdf-page-3">Pág 3: Escalera / Zigzag</option>
+            <option value="pdf-page-4">Pág 4: Diagonal continua</option>
+            <option value="pdf-page-5">Pág 5: Rectángulo abierto (U)</option>
+            <option value="pdf-page-6">Pág 6: Forma en L</option>
+            <option value="pdf-page-7">Pág 7: Número 2 / Onda</option>
+            <option value="pdf-page-8">Pág 8: Espiral Labyrinth</option>
+            <option value="pdf-page-9">Pág 9: Cruz (+)</option>
+            <option value="pdf-page-10">Pág 10: Serpiente doble giro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Plantillas Pixel Art:</label>
+          <select id="select-pixel-preset" class="form-select">
+            <option value="">-- Seleccionar Pixel Art --</option>
+            <option value="pixel-heart">❤️ Corazón</option>
+            <option value="pixel-star">⭐ Estrella</option>
+            <option value="pixel-smiley">😊 Carita Sonriente</option>
+            <option value="pixel-tree">🌲 Árbol</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Generador procedural de ruta:</label>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="number" id="input-route-steps" class="form-input" value="12" min="4" max="40" style="width: 70px;">
+            <button id="btn-random-route" class="btn btn-sm" style="flex: 1;">🎲 Generar Aleatoria</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Importar Imagen a Pixel Art -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">🖼️ Importar Imagen a Píxeles</h2>
+        <div class="form-group">
+          <input type="file" id="input-image-file" class="form-input" accept="image/*">
+        </div>
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="toggle-snap-palette" checked>
+          <span>Adaptar colores a la paleta activa</span>
+        </label>
+      </div>
+
+      <!-- Sección: Configuración del PDF -->
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">📄 Opciones de Impresión PDF</h2>
+
+        <div class="form-group">
+          <label class="form-label" for="select-pdf-format">Formato de hoja:</label>
+          <select id="select-pdf-format" class="form-select">
+            <option value="a4" selected>A4 (210 × 297 mm)</option>
+            <option value="letter">Carta / Letter (8.5 × 11 pulg)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select-pdf-orientation">Orientación:</label>
+          <select id="select-pdf-orientation" class="form-select">
+            <option value="portrait" selected>Vertical (Retrato)</option>
+            <option value="landscape">Horizontal (Apaisado)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select-square-size">Tamaño de los cuadrados en PDF:</label>
+          <select id="select-square-size" class="form-select">
+            <option value="small">Pequeño (8 mm)</option>
+            <option value="medium" selected>Mediano (12 mm - Estilo Muestra)</option>
+            <option value="large">Grande (16 mm)</option>
+            <option value="extra-large">Extra Grande (20 mm)</option>
+            <option value="fit">Ajustar al máximo de la página</option>
+          </select>
+        </div>
+
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="toggle-pdf-grid">
+          <span>Imprimir cuadrícula tenue de fondo</span>
+        </label>
+
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="toggle-pdf-page-nums">
+          <span>Imprimir número de página al pie</span>
+        </label>
+      </div>
+
+    </aside>
+
+    <!-- Área de Trabajo Central (Lienzo interactivo) -->
+    <main class="editor-workspace">
+
+      <!-- Barra de herramientas superior del lienzo -->
+      <div class="canvas-toolbar">
+        <div class="toolbar-group">
+          <button id="btn-undo" class="btn btn-sm" title="Deshacer (Ctrl+Z)">↩️ Deshacer</button>
+          <button id="btn-redo" class="btn btn-sm" title="Rehacer (Ctrl+Y)">↪️ Rehacer</button>
+          <button id="btn-clear" class="btn btn-sm" title="Limpiar diseño actual" style="color: var(--danger);">🗑️ Limpiar</button>
+        </div>
+
+        <div class="toolbar-group">
+          <button id="btn-zoom-out" class="btn btn-sm" title="Reducir zoom">🔍 -</button>
+          <button id="btn-zoom-reset" class="btn btn-sm" title="Restablecer tamaño">100%</button>
+          <button id="btn-zoom-in" class="btn btn-sm" title="Aumentar zoom">🔍 +</button>
+        </div>
+      </div>
+
+      <!-- Lienzo dentro de una hoja simulada -->
+      <div class="canvas-viewport">
+        <div class="paper-sheet">
+          <canvas id="grid-canvas" width="420" height="420"></canvas>
+        </div>
+      </div>
+
+      <!-- Barra de estado inferior -->
+      <footer class="status-bar">
+        <span id="status-info">Página 1 de 10 | Modo: Rutas Lineales | Cuadrados: 12</span>
+        <span>Haz clic o arrastra para trazar • Clic en el último cuadrado para borrarlo</span>
+      </footer>
+
+    </main>
+
+    <!-- Panel Derecho: Gestor de Páginas (Multi-Página) -->
+    <aside class="pages-panel">
+      <div class="pages-header">
+        <span class="pages-title">📑 Páginas</span>
+        <span id="lbl-page-count" class="thumb-title">10 páginas</span>
+      </div>
+
+      <div id="pages-list" class="pages-list"></div>
+
+      <div class="pages-footer">
+        <button id="btn-add-page" class="btn btn-sm btn-primary" style="flex: 1;" title="Crear nueva página en blanco">➕ Nueva</button>
+        <button id="btn-duplicate-page" class="btn btn-sm" title="Duplicar página seleccionada">📋</button>
+        <button id="btn-delete-page" class="btn btn-sm" title="Eliminar página seleccionada" style="color: var(--danger);">🗑️</button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Modal de Vista Previa de PDF -->
+  <div id="modal-preview" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">👁️ Vista Previa del Documento PDF</h3>
+        <button id="btn-close-modal" class="btn btn-sm">✖ Cerrar</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="iframe-preview" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librería jsPDF (Local con CDN de respaldo) -->
+  <script src="js/libs/jspdf.umd.min.js"></script>
+  <script>
+    if (!window.jspdf) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+    }
+  </script>
+
+  <!-- Módulos de la Aplicación -->
+  <script src="js/patterns.js"></script>
+  <script src="js/canvas-editor.js"></script>
+  <script src="js/pdf-generator.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

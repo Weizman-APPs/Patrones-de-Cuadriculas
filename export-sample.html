@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Export Sample</title></head>
+<body>
+  <div id="status">Generando PDF...</div>
+  <script src="js/libs/jspdf.umd.min.js"></script>
+  <script src="js/patterns.js"></script>
+  <script src="js/pdf-generator.js"></script>
+  <script>
+    const pages = PDF_SAMPLE_PATTERNS.map((p, idx) => ({
+      title: p.name,
+      mode: 'routes',
+      gridSize: p.gridSize,
+      steps: p.steps.map((st, sIdx) => ({
+        r: st.r,
+        c: st.c,
+        color: PALETTE_PRESETS.pdfSample.colors[st.colorIndex % 3],
+        step: sIdx + 1
+      })),
+      arrowOptions: {
+        showArrows: false,
+        arrowType: 'direction',
+        arrowColor: 'auto'
+      }
+    }));
+
+    const { doc } = window.patternPdfGenerator.generatePdf(pages, {
+      format: 'a4',
+      squareSizeSetting: 'medium',
+      showGrid: false
+    });
+
+    const base64 = doc.output('datauristring');
+    window._pdfBase64 = base64;
+    document.getElementById('status').innerText = "PDF_GENERATED_LENGTH:" + base64.length;
+  </script>
+</body>
+</html>

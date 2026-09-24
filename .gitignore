@@ -1,0 +1,9 @@
+# Sistema operativo y temporales
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Scripts de test locales
+test-runner.html
+export-sample.html
